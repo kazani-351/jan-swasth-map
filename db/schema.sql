@@ -33,5 +33,25 @@ CREATE TABLE IF NOT EXISTS climate (
   PRIMARY KEY (district_id, obs_date)
 );
 
+-- Seasonal risk calendar (T3): one row per district-disease-month (1..12).
+CREATE TABLE IF NOT EXISTS forecasts (
+  district_id TEXT NOT NULL REFERENCES districts(district_id),
+  disease     TEXT NOT NULL,
+  month       INTEGER NOT NULL,   -- calendar month 1..12
+  risk_tier   TEXT NOT NULL,      -- High | Watch | Low | insufficient_data
+  risk_score  REAL,               -- climatological mean cases for that district-disease-month
+  confidence  TEXT NOT NULL,      -- high | medium | low
+  drivers     TEXT,               -- plain-language explanation
+  PRIMARY KEY (district_id, disease, month)
+);
+
+-- Held-out validation metrics (T3): the hero-claim numbers, recomputed by the pipeline.
+CREATE TABLE IF NOT EXISTS validation (
+  metric TEXT PRIMARY KEY,
+  value  TEXT NOT NULL,
+  note   TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_obs_disease_ym ON observations(disease, year, month);
 CREATE INDEX IF NOT EXISTS idx_obs_district   ON observations(district_id);
+CREATE INDEX IF NOT EXISTS idx_fc_disease_mon ON forecasts(disease, month);

@@ -9,7 +9,7 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 ## BUILD (unlocked only after T1 passes)
 
 - [ ] **T2 — Ingestion → normalized store** (blocks: T3,T4,T5) — scripts pull IDSP/EpiClim/HMIS for 3 states → normalized district-week tables → `seed.sql`. Snapshot baked in; refresh script wired + fail-loud.
-- [ ] **T3 — Seasonal forecast + held-out validation productionized** (needs: T2) — transparent seasonal (monsoon prior + district refinement + climate) written to `forecasts` (district-month tier + drivers + confidence); held-out capture (case-weighted ~86% + unweighted) + 2017 N24Parganas case study written to `validation`. Port `spike/skill_test2.py` logic.
+- [x] **T3 — Seasonal forecast + held-out validation productionized** (needs: T2) — DONE 2026-08-10. `pipeline/forecast.py`: fixed monsoon prior + district burden/confidence → 2556 `forecasts` rows; `validation` table holds held-out case-weighted 85.7% / unweighted 46.4% + disclosed data-fit alternatives (58%/48%) + chance 25%. Self-verifies; asserts capture ≥70%.
 - [ ] **T4 — Coverage-vs-risk gap engine** (needs: T2,T3) — per-capita facility index vs forecast risk → `gaps` rows. (Drug-supply gap = cut-buffer #1.)
 - [ ] **T5 — Worker API** (needs: T2) — `/api/districts|forecasts|gaps|backtest|agent` reading from D1.
 - [ ] **T6 — Dashboard: risk map + alert rail** (needs: T5) — Leaflet choropleth of MH/TN/WB by risk tier + "act now" rail. Hero screen.
