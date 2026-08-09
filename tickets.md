@@ -4,18 +4,12 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 
 ## GATE
 
-- [ ] **T1 — Data & backtest feasibility spike** (blocks: everything)
-  The load-bearing bet. Before any product code:
-  1. Confirm EpiClim (arxiv 2501.18602) data files are downloadable and cover MH/TN/WB districts (climate + dengue/malaria/ADD, weekly).
-  2. Confirm dataful.in #18514 / IDSP observations are obtainable for the 3 states.
-  3. Pick ONE known past outbreak (e.g. a documented dengue surge) with enough history around it.
-  4. Prototype the interpretable baseline on that window; measure whether High/Watch tier precedes the peak by ≥1 week (`lead_weeks`).
-  **Exit test:** the backtest honestly shows nonzero lead on real data → proceed. If not → STOP, report, and re-decide the wedge with the user. No faking.
+- [x] **T1 — Data & backtest feasibility spike** (blocks: everything) — DONE 2026-08-10, PASS. EpiClim (Zenodo 14580510) downloaded + verified. Case-curve early-warning REJECTED (no pre-rise baseline). Wedge reframed to transparent seasonal model: **86% held-out case-weighted capture** (vs 25% chance), beats per-district fit. Disease set + case study resolved. See `spike/FINDINGS.md`.
 
 ## BUILD (unlocked only after T1 passes)
 
 - [ ] **T2 — Ingestion → normalized store** (blocks: T3,T4,T5) — scripts pull IDSP/EpiClim/HMIS for 3 states → normalized district-week tables → `seed.sql`. Snapshot baked in; refresh script wired + fail-loud.
-- [ ] **T3 — Forecast + backtest productionized** (needs: T2) — baseline model + backtest run in pipeline, written to `forecasts` / `backtest` tables (tier + prob + CI + trend + drivers, lead_weeks).
+- [ ] **T3 — Seasonal forecast + held-out validation productionized** (needs: T2) — transparent seasonal (monsoon prior + district refinement + climate) written to `forecasts` (district-month tier + drivers + confidence); held-out capture (case-weighted ~86% + unweighted) + 2017 N24Parganas case study written to `validation`. Port `spike/skill_test2.py` logic.
 - [ ] **T4 — Coverage-vs-risk gap engine** (needs: T2,T3) — per-capita facility index vs forecast risk → `gaps` rows. (Drug-supply gap = cut-buffer #1.)
 - [ ] **T5 — Worker API** (needs: T2) — `/api/districts|forecasts|gaps|backtest|agent` reading from D1.
 - [ ] **T6 — Dashboard: risk map + alert rail** (needs: T5) — Leaflet choropleth of MH/TN/WB by risk tier + "act now" rail. Hero screen.

@@ -34,4 +34,6 @@ Lead with the **backtest**: "on real IDSP data, a transparent model would have f
 Agent keys go in `.dev.vars` (local) or `wrangler secret put` (deployed) — both gitignored. Never commit `.dev.vars`, `.env`, or `.mcp.json`.
 
 ## Gotchas
-(none yet — add a one-liner here whenever a real bug bites, so it doesn't repeat)
+- **EpiClim rows are outbreak REPORTS, not a weekly panel.** Multiple rows share a date (sub-units of a district); the data appears only once an outbreak is already elevated — there is NO pre-rise baseline in the case series. So do NOT model "detect the rising limb of the case curve" (fails — verified in T1 spike). Model **seasonality + climate**, validated spatially on held-out years. Aggregate duplicate dates (sum cases) before any time-series work.
+- Data thins sharply after 2019 (2020-22 sparse). Use 2009-2019 for training/backtest; snapshot framing is honest, live 2026 nowcasting is not supported by this source.
+- Malaria is too sparse in the pilot states (TN=6, WB=21 reports). Lead with **dengue** (best signal + climate-linked), ADD secondary (dense but less climate-linked), malaria flagged-but-thin.

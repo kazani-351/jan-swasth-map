@@ -22,7 +22,9 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 
 ## 2b. Positioning & wedge (grill outcome, 2026-08-10)
 
-**Lead with the backtest, not the dashboard.** The one-line claim we build everything to prove: *"On real IDSP data, a transparent model would have flagged the [outbreak X] in [district] N weeks before the observed peak."* Verifiable, honest, memorable — the differentiator in a field full of vibe-coded dashboards. The dashboard is the vehicle that showcases it, not the headline.
+**Lead with held-out seasonal skill, not the dashboard.** The claim we build everything to prove (CONFIRMED empirically in the T1 spike, 2026-08-10): *"A transparent seasonal model captures **~86% of India's dengue case burden** in held-out years (2016-19) with just 3 predicted months — 3.4x better than chance — and beats an overfit per-district data-fit. Illustrated on the real 2017 North 24 Parganas dengue epidemic."* Verifiable, honest, memorable, and it doubles as the methodology story (domain-knowledge model beat the black-box fit). The dashboard is the vehicle that showcases it, not the headline.
+
+> Why not the original "flag the case-curve peak early" claim: IDSP data is outbreak-REPORT data that only appears once elevated — no pre-rise baseline exists, so case-curve early-warning is not supported. Verified and rejected in the T1 spike. See `spike/FINDINGS.md`.
 
 **The narrative is a first-class deliverable, not optional.** A methodology + story writeup (BlogChain / public) ships alongside the app. It is the conversion lever (the real bottleneck per strategy), the judge-memorability vehicle, and where the "Best xSpan/AgentFoundry integration" recognition angle is argued. Success = a defensible, backtest-proven, well-narrated slice that wins *visibility*, not just a shipped repo.
 
@@ -89,13 +91,19 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 | HMIS (hmis.mohfw.gov.in) | facility counts + capacity | Real; **district bulk-export granularity to confirm** (fog). |
 | District boundary GeoJSON (MH/TN/WB) | choropleth map | Public sources exist; **confirm an open-licensed set** (fog). |
 
-## 7. Forecast method (interpretable baseline)
+## 7. Forecast method (transparent seasonal model — decided by T1 evidence)
 
-**Per district-disease, weekly, 4-week-ahead risk.**
-- Seasonal climatology baseline (historical week-of-year average) + recent-trend component + climate-lag adjustment (rainfall/temp lag, dengue/malaria are climate-sensitive).
-- Output: continuous risk score → **tiers** (Low / Watch / High) via calibrated thresholds; **probability + CI** exposed on detail panel; **trend arrow** (rising/flat/falling); **drivers** (top contributing signals, human-readable).
-- **Rejected:** trained ML (time cost + overfitting on limited data + weaker explainability under judging); LLM-reasoned risk (not a rigorous forecast). ML noted as a documented future upgrade behind the same interface.
-- **Backtest:** hold out a known past outbreak window per state; report lead-weeks the model raised the tier before the observed peak. Honest reporting including misses.
+**Per district-disease, monthly grain, seasonal risk.** (Grain is monthly, not weekly: EpiClim is outbreak-report data with no dense weekly panel — see §14/gotchas.)
+- **Core model = seasonal monsoon prior** refined by district history. Dengue risk concentrates Jul-Sep (73% of pilot-state cases); the shared monsoon prior generalizes far better on held-out years than a per-district month-fit (86% vs 48% case-weighted capture — the fit overfits sparse districts).
+- **Climate features** (precip/temp/LAI from EpiClim) refine and *explain* risk (precip in big-outbreak months ≈2x baseline). Note: EpiClim climate is concurrent with reports, so it is explanatory/refining, not a proven *leading* signal; a lagged-climate leading model is a documented future upgrade.
+- Output: risk **tiers** (Low / Watch / High) per district-month; **drivers** in plain language (season + climate + recent history); an honest **confidence** flag (wider/low-confidence for sparse-history districts).
+- **Lead disease = dengue** (best signal, climate-linked). ADD secondary (dense but less climate-linked). **Malaria too sparse in pilot states — flagged, not forecast.**
+- **Rejected:** case-curve rising-limb detection (no pre-rise baseline — verified fail, T1); per-district data-fit (overfits — 48% vs 86%); trained ML/LLM-reasoned risk (weaker explainability, and the transparent model already wins). All notable as future work behind the same interface.
+
+### 7b. Validation (replaces "backtest lead-weeks")
+- **Held-out capture:** train on ≤2015, test 2016-19; report **case-weighted capture** (~86%: does the model concentrate risk where the burden actually landed) AND **unweighted hit rate** (~46%: small scattered off-season outbreaks are the honest misses). Both reported.
+- **Illustrative case study:** the 2017 North 24 Parganas dengue epidemic (Jul-Sep) sits squarely in the predicted high-risk window — the narrative anchor.
+- Probe: `spike/skill_test2.py` reproduces the numbers; production pipeline recomputes them into a `validation` table.
 
 ## 8. Gap metric (defensible)
 
@@ -156,7 +164,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 
 - **A1 — Real data, 3 states.** Falsifier: any pilot district's cases are not traceable to IDSP/dataful/EpiClim, OR MH/TN/WB not all present in `observations`. Probe: query D1, spot-check 5 districts against source.
 - **A2 — Forecast produced + tiered.** Falsifier: any active district-disease lacks a `forecasts` row with tier+prob+trend for the target window. Probe: `SELECT` coverage count = active districts × diseases.
-- **A3 — Backtest shows nonzero lead (THE HERO CLAIM).** Falsifier: on the chosen past outbreak, the model's High/Watch tier did not precede the observed peak by ≥1 week. Probe: run backtest script, read `lead_weeks`. This is the wedge — if it fails honestly, the positioning changes, we do not fake it.
+- **A3 — Held-out seasonal skill holds (THE HERO CLAIM).** Falsifier: the transparent model's case-weighted capture of dengue burden on held-out years (2016-19) drops to near the 25% chance baseline, OR it does not beat the per-district data-fit. Probe: `spike/skill_test2.py` / production `validation` table (target ~86% vs 25%). Confirmed 2026-08-10. If it ever fails honestly, the positioning changes — we do not fake it.
 - **A9 — Narrative exists and is backed.** Falsifier: no methodology writeup shipped, OR the writeup's headline backtest claim is not reproducible from the repo. Probe: open the writeup, run the cited backtest, confirm the numbers match.
 - **A4 — Gap flag ties risk+coverage.** Falsifier: a flagged gap district is not both (risk High/Watch) and (per_capita_index below median). Probe: verify each `gaps.gap_flag=1` row against its inputs.
 - **A5 — Agent grounded.** Falsifier: agent briefing states a number absent from the district's stored rows, or gives individual medical advice. Probe: 10 scripted prompts, check every claim maps to data.
@@ -176,8 +184,10 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 
 - Exact EpiClim access path + whether its climate coverage spans all MH/TN/WB districts.
 - Exact HMIS facility fields available at district level (bed counts vs facility counts vs both).
-- Which specific past outbreak window(s) to use for the backtest (pick per data availability).
-- Final disease set: dengue + malaria confirmed; third = acute-diarrheal (EpiClim) vs respiratory/ILI (IDSP) — settle by data coverage.
+- ~~Which past outbreak window~~ RESOLVED: 2017 North 24 Parganas dengue (illustrative case study).
+- ~~Final disease set~~ RESOLVED: dengue (lead) + acute-diarrheal (secondary); malaria too sparse in pilot states → flag-only, not forecast.
+- District `population` for the per-capita facility index (T4) — not in EpiClim; source separately (Census/HMIS) or fog.
+- HMIS facility data granularity at district level (T4) — still to confirm.
 - Exact risk-score → tier thresholds and probability calibration (set empirically during build).
 - Product name (working name "Jan Swasth Map"; may run product-name at ship).
 - Organizer answer on CodeNow-as-entry requirement.
