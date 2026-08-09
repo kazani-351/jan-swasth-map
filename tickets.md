@@ -11,8 +11,8 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 - [ ] **T2 — Ingestion → normalized store** (blocks: T3,T4,T5) — scripts pull IDSP/EpiClim/HMIS for 3 states → normalized district-week tables → `seed.sql`. Snapshot baked in; refresh script wired + fail-loud.
 - [x] **T3 — Seasonal forecast + held-out validation productionized** (needs: T2) — DONE 2026-08-10. `pipeline/forecast.py`: fixed monsoon prior + district burden/confidence → 2556 `forecasts` rows; `validation` table holds held-out case-weighted 85.7% / unweighted 46.4% + disclosed data-fit alternatives (58%/48%) + chance 25%. Self-verifies; asserts capture ≥70%.
 - [ ] **T4 — Coverage-vs-risk gap engine** (needs: T2,T3) — per-capita facility index vs forecast risk → `gaps` rows. (Drug-supply gap = cut-buffer #1.)
-- [ ] **T5 — Worker API** (needs: T2) — `/api/districts|forecasts|gaps|backtest|agent` reading from D1.
-- [ ] **T6 — Dashboard: risk map + alert rail** (needs: T5) — Leaflet choropleth of MH/TN/WB by risk tier + "act now" rail. Hero screen.
+- [x] **T5 — Static JSON export** (needs: T2,T3) — DONE 2026-08-10. Deviation D1: read paths ship as static JSON from Pages (not Worker+D1). `pipeline/export.py` → web/data/{districts,forecasts,validation,meta}.json. Worker reserved for the agent only.
+- [x] **T6 — Dashboard: risk map + alert rail** (needs: T5) — DONE 2026-08-10. Leaflet + CartoDB tiles, circle markers (deviation D2, no boundary GeoJSON needed) colored by tier + sized by burden; "Act now" rail w/ plain-language drivers; disease toggle + month slider; hero stat. Verified desktop + mobile, console clean, toggle re-renders.
 - [ ] **T7 — District detail panel** (needs: T6) — tier + prob/CI + trend + drivers + facility coverage + agent briefing.
 - [ ] **T8 — Agent: explain + flag** (needs: T5) — swappable provider (Workers AI default), grounded briefings only.
 - [ ] **T9 — Backtest / replay view** (needs: T3,T6) — replay the T1 outbreak, show the early flag. Demo hero moment.
