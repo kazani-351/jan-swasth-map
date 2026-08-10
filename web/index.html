@@ -20,29 +20,57 @@
     </div>
   </header>
 
-  <div class="controls">
-    <div class="control-group" id="diseaseToggle" role="group" aria-label="Disease"></div>
-    <label class="control-group month-control">
-      <span>Month</span>
-      <input type="range" id="monthSlider" min="1" max="12" step="1" value="8" />
-      <output id="monthLabel">Aug</output>
-    </label>
-    <div class="legend" aria-hidden="true">
-      <span class="lg lg-high">High</span><span class="lg lg-watch">Watch</span><span class="lg lg-low">Low</span>
+  <nav class="view-nav" id="viewNav" aria-label="View">
+    <button data-view="map" aria-pressed="true">Risk map</button>
+    <button data-view="validation" aria-pressed="false">How we know it works</button>
+  </nav>
+
+  <div id="mapView">
+    <div class="controls">
+      <div class="control-group" id="diseaseToggle" role="group" aria-label="Disease"></div>
+      <label class="control-group month-control">
+        <span>Month</span>
+        <input type="range" id="monthSlider" min="1" max="12" step="1" value="8" />
+        <output id="monthLabel">Aug</output>
+      </label>
+      <div class="legend" aria-hidden="true">
+        <span class="lg lg-high">High</span><span class="lg lg-watch">Watch</span><span class="lg lg-low">Low</span>
+      </div>
     </div>
+
+    <main class="layout">
+      <section class="map-wrap"><div id="map"></div></section>
+      <aside class="rail">
+        <div class="rail-head">
+          <h2>Act now</h2>
+          <p id="railSub">Districts to watch this month</p>
+        </div>
+        <ol id="railList" class="rail-list"></ol>
+        <p class="rail-note" id="railNote"></p>
+      </aside>
+    </main>
   </div>
 
-  <main class="layout">
-    <section class="map-wrap"><div id="map"></div></section>
-    <aside class="rail">
-      <div class="rail-head">
-        <h2>Act now</h2>
-        <p id="railSub">Districts to watch this month</p>
+  <section id="validationView" hidden>
+    <div class="vwrap">
+      <h2>Does it actually work?</h2>
+      <p class="vlede" id="vlede"></p>
+      <div class="vcard">
+        <h3>Transparent model vs the alternatives</h3>
+        <p class="vsub">Held-out case-weighted capture of dengue burden (2016–19). Higher = more of the real burden caught. Same 3 predicted months for every model.</p>
+        <div id="modelBars" class="model-bars"></div>
       </div>
-      <ol id="railList" class="rail-list"></ol>
-      <p class="rail-note" id="railNote"></p>
-    </aside>
-  </main>
+      <div class="vcard">
+        <h3 id="csTitle">Case study</h3>
+        <p class="vsub" id="csSub"></p>
+        <div id="caseChart"></div>
+      </div>
+      <div class="vcard vcaveats">
+        <h3>Honest limits</h3>
+        <ul id="caveats"></ul>
+      </div>
+    </div>
+  </section>
 
   <footer class="site-footer">
     <span id="footSource"></span>

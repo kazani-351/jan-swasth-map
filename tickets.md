@@ -15,7 +15,7 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 - [x] **T6 — Dashboard: risk map + alert rail** (needs: T5) — DONE 2026-08-10. Leaflet + CartoDB tiles, circle markers (deviation D2, no boundary GeoJSON needed) colored by tier + sized by burden; "Act now" rail w/ plain-language drivers; disease toggle + month slider; hero stat. Verified desktop + mobile, console clean, toggle re-renders.
 - [ ] **T7 — District detail panel** (needs: T6) — tier + prob/CI + trend + drivers + facility coverage + agent briefing.
 - [ ] **T8 — Agent: explain + flag** (needs: T5) — swappable provider (Workers AI default), grounded briefings only.
-- [ ] **T9 — Backtest / replay view** (needs: T3,T6) — replay the T1 outbreak, show the early flag. Demo hero moment.
+- [x] **T9 — Validation / case-study view** (needs: T3,T6) — DONE 2026-08-10. "How we know it works" view: model-comparison bars (monsoon 85.7% vs data-fit 58% vs per-district 48% vs chance 25%) + 2017 N24Parganas held-out case study (100% of 6,480 cases in predicted Jul-Sep window) + honest caveats. Hand-rolled SVG, no chart lib. Verified desktop+mobile; caught+fixed inline-span bar-fill bug.
 - [ ] **T10 — NL query** (needs: T8) — ask-and-answer over D1. Cut-buffer #2.
 - [ ] **T11 — Design polish** (needs: T6,T7) — modern gov-tech clean; unslop-ui/taste pass; responsive (desktop + 375px + short height).
 

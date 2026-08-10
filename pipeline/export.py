@@ -35,6 +35,26 @@ def main():
     validation = {r["metric"]: {"value": r["value"], "note": r["note"]}
                   for r in cur.execute("SELECT metric, value, note FROM validation")}
 
+    # case study: 2017 North 24 Parganas dengue (held out) vs the model's predicted window (train <=2015)
+    CASE_ID, CASE_DIS, CASE_YEAR = "wb_north_24_parganas", "Dengue", 2017
+    crow = cur.execute("SELECT name, state FROM districts WHERE district_id=?", (CASE_ID,)).fetchone()
+    by_ym = {}
+    for r in cur.execute("SELECT year, month, SUM(cases) c FROM observations WHERE district_id=? AND disease=? "
+                         "GROUP BY year, month", (CASE_ID, CASE_DIS)):
+        by_ym[(r["year"], r["month"])] = r["c"]
+    years = sorted({y for (y, _) in by_ym})
+    series_2017 = [by_ym.get((CASE_YEAR, m), 0) for m in range(1, 13)]
+    climatology = [round(sum(by_ym.get((y, m), 0) for y in years) / max(len(years), 1), 1) for m in range(1, 13)]
+    case_study = {
+        "district": crow["name"] if crow else CASE_ID, "state": crow["state"] if crow else "",
+        "disease": CASE_DIS, "year": CASE_YEAR,
+        "model_peak_months": [7, 8, 9], "model_shoulder_months": [6, 10],
+        "train_note": "Model window fixed from monsoon climatology (trained on ≤2015); 2017 was held out.",
+        "series_2017": series_2017, "climatology": climatology,
+        "peak_month": max(range(1, 13), key=lambda m: series_2017[m - 1]),
+        "total_2017": sum(series_2017),
+    }
+
     meta = {
         "diseases": sorted(fc.keys()),
         "states": sorted({d["state"] for d in districts}),
@@ -45,7 +65,7 @@ def main():
     }
 
     out = {"districts.json": districts, "forecasts.json": fc,
-           "validation.json": validation, "meta.json": meta}
+           "validation.json": validation, "case_study.json": case_study, "meta.json": meta}
     for name, obj in out.items():
         with open(os.path.join(OUTDIR, name), "w") as f:
             json.dump(obj, f, separators=(",", ":"))

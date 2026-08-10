@@ -10,10 +10,10 @@ const markers = {};           // district_id -> leaflet marker
 let markerLayer, districtById;
 
 async function boot() {
-  const [districts, forecasts, validation, meta] = await Promise.all(
-    ["districts", "forecasts", "validation", "meta"].map(n => fetch(`data/${n}.json`).then(r => r.json()))
+  const [districts, forecasts, validation, caseStudy, meta] = await Promise.all(
+    ["districts", "forecasts", "validation", "case_study", "meta"].map(n => fetch(`data/${n}.json`).then(r => r.json()))
   );
-  DATA = { districts, forecasts, validation, meta };
+  DATA = { districts, forecasts, validation, caseStudy, meta };
   districtById = Object.fromEntries(districts.map(d => [d.id, d]));
 
   // hero stat
@@ -30,7 +30,90 @@ async function boot() {
   buildDiseaseToggle(meta.diseases);
   initMap();
   wireControls();
+  wireViewNav();
   render();
+  renderValidation();
+}
+
+function wireViewNav() {
+  const nav = document.getElementById("viewNav");
+  const mapView = document.getElementById("mapView");
+  const valView = document.getElementById("validationView");
+  nav.querySelectorAll("button").forEach(b => {
+    b.onclick = () => {
+      const isMap = b.dataset.view === "map";
+      nav.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      mapView.hidden = !isMap;
+      valView.hidden = isMap;
+      if (isMap && window._map) setTimeout(() => window._map.invalidateSize(), 0);
+    };
+  });
+}
+
+function renderValidation() {
+  const v = DATA.validation, cs = DATA.caseStudy;
+  const cap = v.dengue_capture_caseweighted_pct.value, uw = v.dengue_capture_unweighted_pct.value;
+  document.getElementById("vlede").textContent =
+    `A deliberately simple, transparent model — dengue risk concentrates in the Jul–Sep monsoon — ` +
+    `captures ${cap}% of the dengue case-burden in years it was never fit to (2016–19), ~3.4× better than chance, ` +
+    `and it beats data-driven alternatives that overfit.`;
+
+  const rows = [
+    { label: "Monsoon prior (our model)", val: +v.dengue_capture_caseweighted_pct.value, hi: true },
+    { label: "Window fit to training data", val: +v.alt_trainfit_window_caseweighted_pct.value },
+    { label: "Per-district data fit", val: +v.alt_perdistrict_fit_caseweighted_pct.value },
+    { label: "Chance", val: +v.chance_baseline_pct.value, chance: true },
+  ];
+  document.getElementById("modelBars").innerHTML = rows.map(r =>
+    `<div class="mb-row ${r.hi ? "hi" : ""} ${r.chance ? "mb-chance" : ""}">` +
+    `<span class="mb-label">${esc(r.label)}</span>` +
+    `<span class="mb-track"><span class="mb-fill" style="width:${Math.max(0, Math.min(100, r.val))}%"></span></span>` +
+    `<span class="mb-val">${r.val.toFixed(1)}%</span></div>`).join("");
+
+  document.getElementById("csTitle").textContent = `Held out: the ${cs.year} ${cs.district} dengue epidemic`;
+  const inWin = cs.series_2017.reduce((a, c, i) => a + (cs.model_peak_months.includes(i + 1) ? c : 0), 0);
+  const pct = cs.total_2017 ? Math.round(inWin / cs.total_2017 * 100) : 0;
+  document.getElementById("csSub").textContent =
+    `${cs.train_note} In the held-out ${cs.year} season, ${pct}% of the outbreak's ${cs.total_2017.toLocaleString()} cases fell inside the predicted Jul–Sep window.`;
+  document.getElementById("caseChart").innerHTML = caseChartSVG(cs) + caseLegend();
+
+  const caveats = [
+    `Case-weighted capture is ${cap}%; the unweighted month-hit rate is ${uw}% — small, scattered off-season outbreaks are the honest misses. We optimise for catching the burden, not every event.`,
+    "The source is IDSP outbreak-report data (via EpiClim, 2009–2019): outbreaks appear only once already elevated, so this is seasonal risk, not live case-curve nowcasting.",
+    "Grain is monthly and per-district; malaria is too sparse in these states to forecast (kept as data-only).",
+    "The window is a fixed monsoon-climatology prior, not tuned to the test years — a window fit to the data does worse (shown above).",
+  ];
+  document.getElementById("caveats").innerHTML = caveats.map(c => `<li>${esc(c)}</li>`).join("");
+}
+
+function caseChartSVG(cs) {
+  const W = 680, H = 210, padL = 30, padB = 24, padT = 14, padR = 8;
+  const gw = (W - padL - padR) / 12;
+  const max = Math.max(...cs.series_2017, ...cs.climatology, 1);
+  const y = val => padT + (H - padT - padB) * (1 - val / max);
+  const mlab = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+  let s = `<svg viewBox="0 0 ${W} ${H}" class="cc-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${cs.year} monthly dengue cases; predicted high-risk window shaded">`;
+  cs.model_peak_months.forEach(m => {
+    s += `<rect class="cc-band" x="${(padL + (m - 1) * gw).toFixed(1)}" y="${padT}" width="${gw.toFixed(1)}" height="${H - padT - padB}"/>`;
+  });
+  const clim = cs.climatology.map((val, i) => `${(padL + i * gw + gw / 2).toFixed(1)},${y(val).toFixed(1)}`).join(" ");
+  s += `<polyline class="cc-clim" points="${clim}"/>`;
+  cs.series_2017.forEach((val, i) => {
+    if (val <= 0) return;
+    const x = padL + i * gw + gw * 0.2, bw = gw * 0.6, yy = y(val);
+    s += `<rect class="cc-bar" x="${x.toFixed(1)}" y="${yy.toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - padB - yy).toFixed(1)}" rx="1.5"/>`;
+    s += `<text class="cc-val" x="${(x + bw / 2).toFixed(1)}" y="${(yy - 3).toFixed(1)}" text-anchor="middle">${val.toLocaleString()}</text>`;
+  });
+  mlab.forEach((m, i) => {
+    s += `<text class="cc-axis" x="${(padL + i * gw + gw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle">${m}</text>`;
+  });
+  return s + `</svg>`;
+}
+
+function caseLegend() {
+  return `<div class="cc-legend"><span class="l-band">Predicted High-risk window (Jul–Sep)</span>` +
+    `<span class="l-bar">${DATA.caseStudy.year} cases</span>` +
+    `<span style="border-bottom:1px dashed var(--muted)">Typical seasonal shape</span></div>`;
 }
 
 function buildDiseaseToggle(diseases) {
