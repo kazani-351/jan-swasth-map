@@ -143,6 +143,7 @@ function radiusFor(score) {
 }
 
 function render() {
+  closeBriefing();
   const fc = (DATA.forecasts[state.disease] || {})[String(state.month)] || {};
   markerLayer.clearLayers();
   for (const k in markers) delete markers[k];
@@ -154,11 +155,8 @@ function render() {
       radius: radiusFor(f.score), color: TIER_COLOR[f.tier] || "#94a3b8",
       weight: 1, fillColor: TIER_COLOR[f.tier] || "#94a3b8",
       fillOpacity: f.tier === "Low" ? 0.28 : 0.62
-    }).bindPopup(
-      `<span class="pop-name">${esc(d.name)}</span> · ${esc(d.state)}<br>` +
-      `<span class="pop-tier" style="color:${TIER_COLOR[f.tier] || "#94a3b8"}">${esc(f.tier)}</span> risk · ` +
-      `~${Math.round(f.score)} cases/yr this month<br><small>${esc(f.drivers || "")}</small>`
-    );
+    });
+    m.on("click", () => openBriefing(id));
     m.addTo(markerLayer);
     markers[id] = m;
   });
@@ -189,7 +187,8 @@ function renderRail(fc) {
       `<span class="rail-driver">${esc(f.drivers || "")}</span>`;
     li.onclick = () => {
       const m = markers[id];
-      if (m) { window._map.setView(m.getLatLng(), 7, { animate: true }); m.openPopup(); }
+      if (m) window._map.setView(m.getLatLng(), 7, { animate: true });
+      openBriefing(id);
     };
     list.appendChild(li);
   });
@@ -206,6 +205,94 @@ function wireControls() {
   label.textContent = MONTHS[state.month];
   slider.value = state.month;
   slider.oninput = () => { state.month = +slider.value; label.textContent = MONTHS[state.month]; render(); };
+}
+
+// ---- Briefing agent (explain + flag), grounded in the forecast data ----
+const SHORT = { "Acute Diarrhoeal Disease": "diarrhoeal disease" };
+const shortDisease = d => SHORT[d] || d.toLowerCase();
+const ACTIONS = {
+  "Dengue": "Pre-position vector control (fogging, source reduction), stock rapid diagnostic tests and IV fluids, and alert PHCs and urban wards now.",
+  "Acute Diarrhoeal Disease": "Verify water quality and chlorination, pre-position ORS and IV fluids, and brief PHCs on case management.",
+};
+
+function railParts(show) {
+  ["rail-head", "rail-list", "rail-note"].forEach((cls, i) => {
+    const el = document.querySelector(i === 0 ? ".rail-head" : i === 1 ? "#railList" : "#railNote");
+    if (el) el.hidden = !show;
+  });
+}
+function closeBriefing() {
+  const b = document.getElementById("briefing");
+  if (b) b.hidden = true;
+  railParts(true);
+}
+
+function openBriefing(id) {
+  const d = districtById[id];
+  const disease = state.disease, month = state.month;
+  const monthFc = (DATA.forecasts[disease] || {})[String(month)] || {};
+  const cur = monthFc[id];
+  if (!d || !cur) return;
+
+  const flagged = Object.entries(monthFc)
+    .filter(([, f]) => f.tier === "High" || f.tier === "Watch")
+    .sort((a, b) => b[1].score - a[1].score);
+  const rank = flagged.findIndex(([k]) => k === id) + 1;
+
+  const cal = [];
+  for (let m = 1; m <= 12; m++) {
+    const f = ((DATA.forecasts[disease] || {})[String(m)] || {})[id];
+    cal.push({ m, tier: f ? f.tier : "Low" });
+  }
+  const highMonths = cal.filter(c => c.tier === "High").map(c => MONTHS[c.m]);
+  const watchMonths = cal.filter(c => c.tier === "Watch").map(c => MONTHS[c.m]);
+
+  const dn = shortDisease(disease), mn = MONTHS[month];
+  let text;
+  if (cur.tier === "Low") {
+    text = `In ${mn}, ${d.name} is at low ${dn} risk — off-season here. Historical ${mn} caseload is minimal.`;
+  } else {
+    const sev = cur.tier === "High" ? "HIGH" : "elevated (Watch)";
+    text = `In ${mn}, ${d.name} is at ${sev} ${dn} risk — the seasonal peak window. ` +
+      `The district historically records ~${Math.round(cur.score)} cases in ${mn} (${cur.conf} confidence). ` +
+      (rank ? `It ranks #${rank} of ${flagged.length} flagged districts across the pilot this month.` : "");
+  }
+  const answers = {
+    peak: highMonths.length
+      ? `High ${dn} risk in ${highMonths.join(", ")}${watchMonths.length ? `; watch in ${watchMonths.join(", ")}` : ""}.`
+      : `No High-risk months on record for ${dn} here.`,
+    compare: cur.tier === "Low"
+      ? `${d.name} isn't among this month's flagged districts.`
+      : `#${rank} of ${flagged.length} flagged districts this month by expected ${dn} burden (~${Math.round(cur.score)} cases).`,
+    why: cur.drivers || `${mn} seasonal pattern for ${dn} in ${d.name}.`,
+  };
+
+  const calHtml = cal.map(c =>
+    `<div class="bf-cal-cell ${c.m === month ? "now" : ""}"><div class="bf-cal-bar ${c.tier}"></div>${MONTHS[c.m][0]}</div>`).join("");
+  const action = cur.tier === "Low" ? "Monitor; no elevated action needed this month." : (ACTIONS[disease] || "Alert district health staff and monitor.");
+
+  const b = document.getElementById("briefing");
+  b.innerHTML =
+    `<button class="bf-back" id="bfBack">← All districts</button>` +
+    `<p class="bf-name">${esc(d.name)}</p><p class="bf-state">${esc(d.state)} · ${esc(disease)} · ${esc(mn)}</p>` +
+    `<span class="bf-tier ${cur.tier}">${esc(cur.tier)}</span><span class="bf-conf">${esc(cur.conf)} confidence</span>` +
+    `<p class="bf-text">${esc(text)}</p>` +
+    `<div class="bf-action ${cur.tier}"><strong>Recommended:</strong> ${esc(action)}</div>` +
+    `<p class="bf-cal-label">Seasonal risk calendar (${esc(disease)})</p><div class="bf-cal">${calHtml}</div>` +
+    `<div class="bf-asks"><p class="bf-asks-label">Ask about this district</p>` +
+    `<button class="bf-ask" data-a="peak">When does risk peak here?</button>` +
+    `<button class="bf-ask" data-a="compare">How does it compare?</button>` +
+    `<button class="bf-ask" data-a="why">Why this risk level?</button>` +
+    `<div class="bf-answer" id="bfAnswer" hidden></div></div>` +
+    `<p class="bf-llm-note">Grounded in the forecast data. A live LLM adds free-form Q&A at deploy.</p>`;
+  b.hidden = false;
+  railParts(false);
+
+  document.getElementById("bfBack").onclick = closeBriefing;
+  const ans = document.getElementById("bfAnswer");
+  b.querySelectorAll(".bf-ask").forEach(btn => {
+    btn.onclick = () => { ans.textContent = answers[btn.dataset.a]; ans.hidden = false; };
+  });
 }
 
 boot().catch(err => {
