@@ -21,7 +21,7 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 ## SHIP
 
 - [ ] **T12 — Deploy** (needs: build core) — Cloudflare Pages + Worker + D1; poll healthy + smoke one real path.
-- [ ] **T13 — Narrative writeup** (needs: T3,T9) — FIRST-CLASS. Methodology + the backtest story, reproducible from repo. The conversion lever.
+- [~] **T13 — Narrative writeup** (needs: T3,T9) — FIRST-CLASS. METHODOLOGY.md DONE 2026-08-10 (judge-facing: claim, rejected approaches, model, held-out validation table, honest limits, reproduce steps). BlogChain public piece PENDING — offer outline-architect first (standing preference).
 - [ ] **T14 — Demo video + README** (needs: T12) — 2-3 min DHO walkthrough; README = what/run/test.
 
 ## Cut-order under time pressure
