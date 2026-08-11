@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS forecasts (
   month       INTEGER NOT NULL,   -- calendar month 1..12
   risk_tier   TEXT NOT NULL,      -- High | Watch | Low | insufficient_data
   risk_score  REAL,               -- climatological mean cases for that district-disease-month
-  confidence  TEXT NOT NULL,      -- high | medium | low
+  trend       TEXT,               -- rising | flat | falling (seasonal direction vs previous month)
+  confidence  TEXT NOT NULL,      -- high | medium | low (qualitative; NO numeric CI — sparse data, avoid fake precision)
   drivers     TEXT,               -- plain-language explanation
   PRIMARY KEY (district_id, disease, month)
 );

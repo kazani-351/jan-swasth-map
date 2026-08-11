@@ -42,7 +42,7 @@ body {
 .control-group { display: flex; align-items: center; gap: .4rem; }
 #diseaseToggle button {
   font: inherit; font-size: .85rem; padding: .35rem .8rem; border: 1px solid var(--line);
-  background: var(--bg); color: var(--muted); border-radius: 999px; cursor: pointer;
+  background: var(--bg); color: var(--muted); border-radius: 8px; cursor: pointer;
   transition: transform .06s ease;
 }
 #diseaseToggle button:active { transform: scale(.97); }
@@ -142,8 +142,10 @@ body {
 
 .site-footer { padding: .55rem 1.5rem; font-size: .72rem; color: var(--muted); background: var(--panel); border-top: 1px solid var(--line); }
 .foot-sep { margin: 0 .5rem; opacity: .5; }
-.leaflet-popup-content { font: inherit; font-size: .82rem; }
-.pop-name { font-weight: 700; } .pop-tier { font-weight: 700; }
+.bf-trend { font-size: .72rem; font-weight: 600; margin-left: .5rem; }
+.bf-trend.rising { color: var(--high); }
+.bf-trend.falling { color: var(--accent); }
+.bf-trend.flat { color: var(--muted); }
 
 @media (max-width: 860px) {
   .site-header { flex-wrap: wrap; }

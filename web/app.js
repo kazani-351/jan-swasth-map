@@ -1,7 +1,10 @@
 "use strict";
 
 const MONTHS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const TIER_COLOR = { High: "#dc2626", Watch: "#d97706", Low: "#94a3b8" };
+// single source of truth for tier colors = the CSS custom properties (--high/--watch/--low)
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#94a3b8";
+const TIER_COLOR = { High: cssVar("--high"), Watch: cssVar("--watch"), Low: cssVar("--low") };
+const TREND = { rising: "↑ rising", falling: "↓ easing", flat: "→ steady" };
 const state = { disease: "Dengue", month: 8 };
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -275,7 +278,9 @@ function openBriefing(id) {
   b.innerHTML =
     `<button class="bf-back" id="bfBack">← All districts</button>` +
     `<p class="bf-name">${esc(d.name)}</p><p class="bf-state">${esc(d.state)} · ${esc(disease)} · ${esc(mn)}</p>` +
-    `<span class="bf-tier ${cur.tier}">${esc(cur.tier)}</span><span class="bf-conf">${esc(cur.conf)} confidence</span>` +
+    `<span class="bf-tier ${cur.tier}">${esc(cur.tier)}</span>` +
+    (cur.trend ? `<span class="bf-trend ${cur.trend}">${TREND[cur.trend] || ""}</span>` : "") +
+    `<span class="bf-conf">${esc(cur.conf)} confidence</span>` +
     `<p class="bf-text">${esc(text)}</p>` +
     `<div class="bf-action ${cur.tier}"><strong>Recommended:</strong> ${esc(action)}</div>` +
     `<p class="bf-cal-label">Seasonal risk calendar (${esc(disease)})</p><div class="bf-cal">${calHtml}</div>` +

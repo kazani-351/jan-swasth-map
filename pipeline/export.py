@@ -28,9 +28,10 @@ def main():
 
     # forecasts nested: disease -> month -> district_id -> {tier,score,conf,drivers}
     fc = {}
-    for r in cur.execute("SELECT district_id, disease, month, risk_tier, risk_score, confidence, drivers FROM forecasts"):
+    for r in cur.execute("SELECT district_id, disease, month, risk_tier, risk_score, trend, confidence, drivers FROM forecasts"):
         fc.setdefault(r["disease"], {}).setdefault(str(r["month"]), {})[r["district_id"]] = {
-            "tier": r["risk_tier"], "score": r["risk_score"], "conf": r["confidence"], "drivers": r["drivers"]}
+            "tier": r["risk_tier"], "score": r["risk_score"], "trend": r["trend"],
+            "conf": r["confidence"], "drivers": r["drivers"]}
 
     validation = {r["metric"]: {"value": r["value"], "note": r["note"]}
                   for r in cur.execute("SELECT metric, value, note FROM validation")}

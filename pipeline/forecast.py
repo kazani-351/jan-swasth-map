@@ -93,8 +93,18 @@ def main():
             ny = len(d_years[did])
             conf = "high" if ny >= 3 else "medium" if ny == 2 else "low"
             high_burden = d_total[did] >= med_total
+            means = {m: round(dm_cases[did].get(m, 0) / ny, 1) for m in range(1, 13)}
             for m in range(1, 13):
-                mean_cases = round(dm_cases[did].get(m, 0) / ny, 1)
+                mean_cases = means[m]
+                prev = means[12 if m == 1 else m - 1]
+                if mean_cases < 1 and prev < 1:
+                    trend = "flat"
+                elif mean_cases > prev * 1.15:
+                    trend = "rising"
+                elif mean_cases < prev * 0.85:
+                    trend = "falling"
+                else:
+                    trend = "flat"
                 if m in peak:
                     tier = "High" if high_burden else "Watch"
                 elif m in shoulder:
@@ -103,14 +113,14 @@ def main():
                     tier = "Low"
                 if tier in ("High", "Watch"):
                     season = "peak" if m in peak else "shoulder"
-                    drivers = (f"{calendar.month_abbr[m]} is {disease.lower()} {season} season; "
+                    drivers = (f"{calendar.month_abbr[m]} is {disease.lower()} {season} season ({trend}); "
                                f"{d_name[did]} is a {'high' if high_burden else 'lower'}-burden district "
                                f"(~{mean_cases:.0f} cases/yr this month over {ny} yr).")
                 else:
                     drivers = f"{calendar.month_abbr[m]} is off-season for {disease.lower()} here."
                 lines.append(
-                    "INSERT INTO forecasts (district_id,disease,month,risk_tier,risk_score,confidence,drivers) "
-                    f"VALUES ({q(did)},{q(disease)},{m},{q(tier)},{q(mean_cases)},{q(conf)},{q(drivers)});")
+                    "INSERT INTO forecasts (district_id,disease,month,risk_tier,risk_score,trend,confidence,drivers) "
+                    f"VALUES ({q(did)},{q(disease)},{m},{q(tier)},{q(mean_cases)},{q(trend)},{q(conf)},{q(drivers)});")
 
         # ---- held-out validation (dengue = the hero claim) ----
         if disease == "Dengue":

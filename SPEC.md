@@ -36,7 +36,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 
 ### IN (V1)
 1. **Ingestion** — normalize IDSP/EpiClim/HMIS into one district-week store for MH + TN + WB.
-2. **Forecast** — interpretable baseline risk per district-disease, 4-week horizon, 3 tiers + trend + probability/CI.
+2. **Forecast** — transparent seasonal risk per district-disease, monthly grain, 3 tiers + trend + qualitative confidence (no numeric CI — see D5).
 3. **Gap detection** — coverage-vs-risk mismatch flag (facility density/capacity vs forecast risk).
 4. **Dashboard** — choropleth risk map + "act now" alert rail; district detail panel.
 5. **Agent** — plain-language district briefing (explain + flag) AND a thin natural-language query over the data.
@@ -76,7 +76,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 - `districts(district_id, name, state, population, lat, lon)`
 - `observations(district_id, disease, week, cases, deaths, source)`
 - `climate(district_id, week, rainfall_mm, temp_avg, humidity)`
-- `forecasts(district_id, disease, target_week, generated_week, risk_tier, risk_prob, ci_low, ci_high, trend, drivers_json)`
+- `forecasts(district_id, disease, month, risk_tier, risk_score, trend, confidence, drivers)`  — actual shipped schema (D5: qualitative confidence, no numeric prob/CI)
 - `facilities(district_id, phc_count, chc_count, beds, capacity_index, per_capita_index)`
 - `gaps(district_id, disease, target_week, gap_flag, gap_reason, coverage_index, risk_tier)`
 - `backtest(district_id, disease, window, predicted_tier, actual_cases, lead_weeks)`
@@ -121,7 +121,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 
 - **Direction:** modern gov-tech clean — data-dense but credible; restrained palette, clear choropleth, tabular numbers, readable at a glance. (Anti-slop: no purple-gradient default; will run unslop-ui/taste at build.)
 - **Hero screen:** choropleth district map of MH/TN/WB colored by risk tier + right-hand **alert rail** of top-N "act now" districts (rising risk + gap flag).
-- **District detail panel:** forecast tier + probability/CI + trend + drivers + facility coverage + agent briefing.
+- **District detail panel:** forecast tier + qualitative confidence + trend + drivers + agent briefing. (No numeric CI — D5. Facility coverage — cut, D3.)
 - **NL query box:** ask-and-answer over the data (demo feature).
 - **Backtest view:** replay a past outbreak, show early flag.
 - **Responsive web**, desktop-first (DHO office use); verify mobile + short-height per house rules.
@@ -163,7 +163,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 ## 15. Acceptance criteria (each names its falsifier)
 
 - **A1 — Real data, 3 states.** Falsifier: any pilot district's cases are not traceable to IDSP/dataful/EpiClim, OR MH/TN/WB not all present in `observations`. Probe: query D1, spot-check 5 districts against source.
-- **A2 — Forecast produced + tiered.** Falsifier: any active district-disease lacks a `forecasts` row with tier+prob+trend for the target window. Probe: `SELECT` coverage count = active districts × diseases.
+- **A2 — Forecast produced + tiered.** Falsifier: any active district-disease lacks a `forecasts` row with tier+trend+confidence for each month. Probe: `SELECT` coverage count = active districts × diseases × 12.
 - **A3 — Held-out seasonal skill holds (THE HERO CLAIM).** Falsifier: the transparent model's case-weighted capture of dengue burden on held-out years (2016-19) drops to near the 25% chance baseline, OR it does not beat the per-district data-fit. Probe: `spike/skill_test2.py` / production `validation` table (target ~86% vs 25%). Confirmed 2026-08-10. If it ever fails honestly, the positioning changes — we do not fake it.
 - **A9 — Narrative exists and is backed.** Falsifier: no methodology writeup shipped, OR the writeup's headline backtest claim is not reproducible from the repo. Probe: open the writeup, run the cited backtest, confirm the numbers match.
 - **A4 — Gap flag ties risk+coverage.** Falsifier: a flagged gap district is not both (risk High/Watch) and (per_capita_index below median). Probe: verify each `gaps.gap_flag=1` row against its inputs.
@@ -177,7 +177,7 @@ An open early-warning + resource-gap map for **District Health Officers**: it fo
 - **AN1:** No auth. `/login`, `/signup`, or any account creation returns 404 / does not exist in V1.
 - **AN2:** No PII. No individual-level or ABHA/ABDM record appears anywhere in the data store, API, or UI. Probe: schema + sample scan for person-level fields.
 - **AN3:** No live-source hard dependency. Demo does not break if IDSP/HMIS are offline (serves baked snapshot). Probe: block outbound to those hosts, load app.
-- **AN4:** No fabricated precision. UI never shows a single "exact case count next week" as a certainty; risk is always tiered + CI. Probe: inspect forecast rendering.
+- **AN4:** No fabricated precision. UI never shows a single "exact case count next week" as a certainty; risk is always **tiered with qualitative confidence** (never a fake-precise number or numeric CI — D5). Probe: inspect forecast rendering.
 - **AN5:** No silent stale-success. A failed refresh logs loudly and does not report success. Probe: force a source 404, run refresh, check exit code + log.
 
 ## 17. Not yet specified (fog — stated, not invented)
