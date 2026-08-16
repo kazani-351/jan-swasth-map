@@ -20,7 +20,7 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 
 ## SHIP
 
-- [ ] **T12 — Deploy** (needs: build core) — Cloudflare Pages + Worker + D1; poll healthy + smoke one real path.
+- [x] **T12 — Deploy** — DONE + VERIFIED LIVE 2026-08-10. Frontend on Cloudflare Workers static-assets at **https://jan-swasth-map.kazani.workers.dev** (not Pages/D1 — static-JSON deviation D1). Agent Worker at https://jan-swasth-agent.kazani.workers.dev. Production smoke: live site renders (no console errors) + agent answers from the deployed origin (grounded, correct numbers). TODO: set Worker ALLOWED_ORIGIN to the site URL + Mesh spend cap.
 - [~] **T13 — Narrative writeup** (needs: T3,T9) — FIRST-CLASS. METHODOLOGY.md DONE 2026-08-10 (judge-facing: claim, rejected approaches, model, held-out validation table, honest limits, reproduce steps). BlogChain public piece PENDING — offer outline-architect first (standing preference).
 - [ ] **T14 — Demo video + README** (needs: T12) — 2-3 min DHO walkthrough; README = what/run/test.
 
