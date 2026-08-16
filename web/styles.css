@@ -102,10 +102,16 @@ body {
 .bf-cal-bar { height: 22px; border-radius: 3px; margin-bottom: 2px; background: var(--low); opacity: .35; }
 .bf-cal-bar.High { background: var(--high); opacity: 1; } .bf-cal-bar.Watch { background: var(--watch); opacity: .9; }
 .bf-cal-cell.now .bf-cal-bar { outline: 2px solid var(--ink); outline-offset: 1px; }
-.bf-asks { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: .8rem; }
-.bf-asks-label { font-size: .72rem; color: var(--muted); margin-bottom: .4rem; }
-.bf-ask { font: inherit; font-size: .78rem; text-align: left; width: 100%; padding: .45rem .6rem; margin-bottom: .35rem; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; color: var(--ink); }
-.bf-ask:hover { background: var(--bg); }
+.bf-agent { margin-top: 1rem; border: 1px solid var(--accent); border-radius: 10px; padding: .7rem .8rem; background: var(--bg); }
+.bf-agent-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; }
+.bf-agent-title { font-size: .86rem; font-weight: 700; }
+.bf-agent-badge { font-size: .56rem; font-weight: 700; letter-spacing: .05em; color: #fff; background: var(--accent); padding: .14rem .42rem; border-radius: 999px; }
+.bf-agent-brief { font: inherit; font-size: .82rem; font-weight: 600; width: 100%; text-align: left; padding: .5rem .65rem; margin-bottom: .4rem; border: none; background: var(--accent); color: #fff; border-radius: 8px; cursor: pointer; }
+.bf-agent-brief:disabled { opacity: .6; cursor: default; }
+.bf-quick { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; margin-top: .55rem; }
+.bf-quick-label { font-size: .66rem; color: var(--muted); text-transform: uppercase; letter-spacing: .03em; margin-right: .15rem; }
+.bf-ask { font: inherit; font-size: .74rem; padding: .22rem .6rem; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; cursor: pointer; color: var(--muted); }
+.bf-ask:hover { color: var(--ink); border-color: var(--muted); }
 .bf-ask-row { display: flex; gap: .4rem; margin: .5rem 0 .35rem; }
 .bf-input { flex: 1; min-width: 0; font: inherit; font-size: .8rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
 .bf-send { font: inherit; font-size: .8rem; padding: .45rem .8rem; border: none; background: var(--accent); color: #fff; border-radius: 8px; cursor: pointer; }

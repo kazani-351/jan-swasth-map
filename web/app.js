@@ -371,13 +371,20 @@ function openBriefing(id) {
     `<p class="bf-text">${esc(text)}</p>` +
     planHtml +
     `<p class="bf-cal-label">Seasonal risk calendar (${esc(disease)})</p><div class="bf-cal">${calHtml}</div>` +
-    `<div class="bf-asks"><p class="bf-asks-label">Ask about this district</p>` +
-    `<button class="bf-ask" data-a="peak">When does risk peak here?</button>` +
-    `<button class="bf-ask" data-a="compare">How does it compare?</button>` +
-    `<button class="bf-ask" data-a="why">Why this risk level?</button>` +
-    (AGENT_ENDPOINT ? `<div class="bf-ask-row"><input class="bf-input" id="bfInput" placeholder="Ask the agent anything…" maxlength="500" /><button class="bf-send" id="bfSend">Ask</button></div>` : "") +
-    `<div class="bf-answer" id="bfAnswer" hidden></div></div>` +
-    `<p class="bf-llm-note">${AGENT_ENDPOINT ? "Live agent, grounded strictly in the facts above (deterministic plan is the fallback)." : "Deterministic plan, grounded in the forecast data. The live agent adds free-form Q&A once deployed."}</p>`;
+    `<div class="bf-agent">` +
+      `<div class="bf-agent-head"><span class="bf-agent-title">Response agent</span>` +
+      (AGENT_ENDPOINT ? `<span class="bf-agent-badge">LIVE · AI</span>` : "") + `</div>` +
+      (AGENT_ENDPOINT
+        ? `<button class="bf-agent-brief" id="bfBrief">✦ Draft the operational brief</button>` +
+          `<div class="bf-ask-row"><input class="bf-input" id="bfInput" placeholder="Ask the agent about this district…" maxlength="500" /><button class="bf-send" id="bfSend">Ask</button></div>`
+        : "") +
+      `<div class="bf-answer" id="bfAnswer" hidden></div>` +
+      `<div class="bf-quick"><span class="bf-quick-label">Quick facts</span>` +
+        `<button class="bf-ask" data-a="peak">peak</button>` +
+        `<button class="bf-ask" data-a="compare">rank</button>` +
+        `<button class="bf-ask" data-a="why">why</button></div>` +
+      `<p class="bf-llm-note">${AGENT_ENDPOINT ? "The agent reasons only from the facts above; the deterministic plan is its fallback." : "Deterministic plan. Deploy the Worker to activate the live agent."}</p>` +
+    `</div>`;
   b.hidden = false;
   railParts(false);
 
@@ -399,6 +406,16 @@ function openBriefing(id) {
     };
     sendBtn.onclick = go;
     input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  }
+
+  const briefBtn = document.getElementById("bfBrief");
+  if (briefBtn) {
+    briefBtn.onclick = async () => {
+      ans.hidden = false; ans.textContent = "Drafting…"; briefBtn.disabled = true;
+      const text = await askAgent(context, "");
+      ans.textContent = text || "The live agent is unavailable right now — see the response plan above.";
+      briefBtn.disabled = false;
+    };
   }
 }
 
