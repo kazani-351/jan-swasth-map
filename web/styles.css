@@ -113,6 +113,19 @@ body {
 .bf-answer { font-size: .82rem; line-height: 1.45; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: .55rem .65rem; margin-top: .3rem; }
 .bf-llm-note { font-size: .68rem; color: var(--muted); margin-top: .8rem; font-style: italic; }
 
+.intro { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+  background: rgba(15,23,42,.45); padding: 1rem; }
+.intro-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-width: 460px;
+  padding: 1.4rem 1.5rem; box-shadow: 0 10px 40px rgba(15,23,42,.25); }
+.intro-card h2 { margin: 0 0 .7rem; font-size: 1.25rem; line-height: 1.25; letter-spacing: -0.01em; }
+.intro-card p { margin: 0 0 .7rem; font-size: .88rem; line-height: 1.5; color: var(--ink); }
+.intro-honest { color: var(--muted) !important; }
+.intro-tip { font-size: .82rem !important; color: var(--muted) !important; }
+.intro-btn { font: inherit; font-size: .88rem; font-weight: 600; padding: .55rem 1rem; border: none;
+  background: var(--accent); color: #fff; border-radius: 9px; cursor: pointer; margin-top: .3rem; }
+.intro-btn:active { transform: scale(.98); }
+.foot-link { font: inherit; font-size: .72rem; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; }
+
 .view-nav { display: flex; gap: .3rem; padding: .5rem 1.5rem; background: var(--panel); border-bottom: 1px solid var(--line); }
 .view-nav button {
   font: inherit; font-size: .82rem; padding: .3rem .8rem; border: none; background: none;

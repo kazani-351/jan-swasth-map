@@ -20,6 +20,16 @@
     </div>
   </header>
 
+  <div id="intro" class="intro" hidden>
+    <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+      <h2 id="introTitle">Know where outbreaks will hit — and what to do about it.</h2>
+      <p>An open early-warning + response tool for India's <strong>district health officers</strong>. It forecasts seasonal outbreak risk (dengue, diarrhoeal disease) for every district, drafts a prioritised response plan, and lets you ask a grounded AI agent about any district.</p>
+      <p class="intro-honest">Built on real IDSP surveillance data with an honestly validated method — a transparent model that captures <strong>86% of dengue case-burden on held-out years</strong>. The receipts are under <em>"How we know it works."</em></p>
+      <p class="intro-tip">Click any district on the map for its risk read, response plan, and the AI agent.</p>
+      <button id="introClose" class="intro-btn">Explore the map →</button>
+    </div>
+  </div>
+
   <nav class="view-nav" id="viewNav" aria-label="View">
     <button data-view="map" aria-pressed="true">Risk map</button>
     <button data-view="validation" aria-pressed="false">How we know it works</button>
@@ -74,6 +84,8 @@
   </section>
 
   <footer class="site-footer">
+    <button id="aboutLink" class="foot-link">About</button>
+    <span class="foot-sep">·</span>
     <span id="footSource"></span>
     <span class="foot-sep">·</span>
     <span>Transparent seasonal model (fixed monsoon prior). Method &amp; honest limits in the writeup.</span>

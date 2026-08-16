@@ -50,8 +50,22 @@ async function boot() {
   initMap();
   wireControls();
   wireViewNav();
+  wireIntro();
   render();
   renderValidation();
+}
+
+function wireIntro() {
+  const intro = document.getElementById("intro");
+  const hide = () => { intro.hidden = true; try { sessionStorage.setItem("jsmIntroSeen", "1"); } catch {} };
+  const show = () => { intro.hidden = false; };
+  document.getElementById("introClose").onclick = hide;
+  document.getElementById("aboutLink").onclick = show;
+  intro.addEventListener("click", e => { if (e.target === intro) hide(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !intro.hidden) hide(); });
+  let seen = false;
+  try { seen = sessionStorage.getItem("jsmIntroSeen") === "1"; } catch {}
+  if (!seen) show();
 }
 
 function wireViewNav() {
