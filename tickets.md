@@ -24,5 +24,11 @@ Tracer-bullet slices. Work top-to-bottom. Each ticket names its blocking edges. 
 - [~] **T13 — Narrative writeup** (needs: T3,T9) — FIRST-CLASS. METHODOLOGY.md DONE 2026-08-10 (judge-facing: claim, rejected approaches, model, held-out validation table, honest limits, reproduce steps). BlogChain public piece PENDING — offer outline-architect first (standing preference).
 - [ ] **T14 — Demo video + README** (needs: T12) — 2-3 min DHO walkthrough; README = what/run/test.
 
+## EXPANSION — agentic-response system (post-review scope, 2026-08-10)
+Leading-signal big bet VALIDATED NO-GO (`spike/FINDINGS.md`: climate doesn't lead outbreaks in this data). Ambition redirected to a genuinely agentic *response* system (engineering-risk, theme-fit) rather than a predictive moonshot.
+- [x] **T15 — District Response Agent, deterministic layer** — DONE 2026-08-10. Briefing → full response plan: posture (Mobilise/Prepare/Monitor closely/Routine, from tier+trend) + prioritized actions by disease + burden-scaled resources (honest bands, no fake precision) + timeline (week/month/watch-for) + escalation trigger. Verified desktop; posture branches confirmed across tiers/trends.
+- [ ] **T16 — Live LLM agent layer** — CF Worker + Workers AI: multi-step tool-use (forecast/peer-compare/historical-analogue), LLM-reasoned plan + free-form Q&A. Needs wrangler install gate; deploy + curl test (no local workerd on Monterey). The deterministic plan is the graceful fallback.
+- [ ] **T17 — xSpan CareHub integration** (bonus award) — investigate a usable population/data endpoint; wire only if it genuinely fits.
+
 ## Cut-order under time pressure
 1. Drug-supply gap (already deferred)  2. T10 NL query  — never cut: T1, T3 backtest, T13 narrative.

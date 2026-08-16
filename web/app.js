@@ -210,13 +210,9 @@ function wireControls() {
   slider.oninput = () => { state.month = +slider.value; label.textContent = MONTHS[state.month]; render(); };
 }
 
-// ---- Briefing agent (explain + flag), grounded in the forecast data ----
+// ---- Response agent (explain + flag + plan), grounded in the forecast data ----
 const SHORT = { "Acute Diarrhoeal Disease": "diarrhoeal disease" };
 const shortDisease = d => SHORT[d] || d.toLowerCase();
-const ACTIONS = {
-  "Dengue": "Pre-position vector control (fogging, source reduction), stock rapid diagnostic tests and IV fluids, and alert PHCs and urban wards now.",
-  "Acute Diarrhoeal Disease": "Verify water quality and chlorination, pre-position ORS and IV fluids, and brief PHCs on case management.",
-};
 
 function railParts(show) {
   ["rail-head", "rail-list", "rail-note"].forEach((cls, i) => {
@@ -228,6 +224,48 @@ function closeBriefing() {
   const b = document.getElementById("briefing");
   if (b) b.hidden = true;
   railParts(true);
+}
+
+// Deterministic, grounded response plan (the LLM layer will reason a richer version at deploy).
+const ACTION_LIB = {
+  "Dengue": [
+    "Vector control: fogging + source reduction in affected wards",
+    "Stock rapid diagnostic tests (NS1/IgM) and IV fluids at PHCs/CHCs",
+    "Activate fever surveillance; alert PHCs and urban local bodies",
+    "Community messaging: remove standing water, use bed nets",
+  ],
+  "Acute Diarrhoeal Disease": [
+    "Test water quality; ensure chlorination of affected supplies",
+    "Pre-position ORS and IV fluids at PHCs",
+    "Brief PHCs on case management and reporting",
+    "Sanitation & hand-hygiene messaging in affected areas",
+  ],
+};
+
+function buildResponsePlan(cur, disease) {
+  const tier = cur.tier, trend = cur.trend || "flat";
+  let posture, postureClass;
+  if (tier === "High") { posture = trend === "falling" ? "Sustain & de-escalate" : "Mobilise"; postureClass = "Mobilise"; }
+  else if (tier === "Watch") { posture = trend === "rising" ? "Prepare" : "Monitor closely"; postureClass = "Prepare"; }
+  else { posture = "Routine surveillance"; postureClass = "Routine"; }
+
+  const lib = ACTION_LIB[disease] || ["Alert district health staff", "Pre-position supplies", "Monitor reporting"];
+  const n = postureClass === "Mobilise" ? lib.length : postureClass === "Prepare" ? 3 : 1;
+  const actions = lib.slice(0, n);
+
+  const s = Math.round(cur.score || 0);
+  const resources = (tier === "Low" || s < 5)
+    ? "Routine stock levels; no surge pre-positioning indicated."
+    : `Indicative: pre-position rapid tests and fluids for ~${s}–${Math.round(s * 1.5)} presentations this month (scaled to expected burden — refine with local stock).`;
+
+  const timeline = tier === "Low"
+    ? { week: "Continue routine reporting.", month: "Watch for the seasonal ramp (see calendar).", watch: "Any case cluster → open a line-list." }
+    : {
+        week: postureClass === "Mobilise" ? actions[0] : "Confirm supply readiness and PHC contacts.",
+        month: postureClass === "Mobilise" ? "Sustain vector control / case management; daily line-listing." : "Complete pre-positioning before peak; brief field staff.",
+        watch: `Escalate to Mobilise / request state support if cases exceed ~${Math.round((s || 10) * 1.5)} or spread to adjacent blocks.`,
+      };
+  return { posture, postureClass, actions, resources, timeline };
 }
 
 function openBriefing(id) {
@@ -272,7 +310,17 @@ function openBriefing(id) {
 
   const calHtml = cal.map(c =>
     `<div class="bf-cal-cell ${c.m === month ? "now" : ""}"><div class="bf-cal-bar ${c.tier}"></div>${MONTHS[c.m][0]}</div>`).join("");
-  const action = cur.tier === "Low" ? "Monitor; no elevated action needed this month." : (ACTIONS[disease] || "Alert district health staff and monitor.");
+  const plan = buildResponsePlan(cur, disease);
+  const planHtml =
+    `<div class="bf-plan">` +
+    `<div class="bf-plan-head">Response plan <span class="bf-posture ${plan.postureClass}">${esc(plan.posture)}</span></div>` +
+    `<ol class="bf-actions">${plan.actions.map(a => `<li>${esc(a)}</li>`).join("")}</ol>` +
+    `<div class="bf-res"><strong>Resources:</strong> ${esc(plan.resources)}</div>` +
+    `<div class="bf-timeline">` +
+      `<div><span class="bf-tl-k">This week</span>${esc(plan.timeline.week)}</div>` +
+      `<div><span class="bf-tl-k">This month</span>${esc(plan.timeline.month)}</div>` +
+      `<div><span class="bf-tl-k">Watch-for</span>${esc(plan.timeline.watch)}</div>` +
+    `</div></div>`;
 
   const b = document.getElementById("briefing");
   b.innerHTML =
@@ -282,14 +330,14 @@ function openBriefing(id) {
     (cur.trend ? `<span class="bf-trend ${cur.trend}">${TREND[cur.trend] || ""}</span>` : "") +
     `<span class="bf-conf">${esc(cur.conf)} confidence</span>` +
     `<p class="bf-text">${esc(text)}</p>` +
-    `<div class="bf-action ${cur.tier}"><strong>Recommended:</strong> ${esc(action)}</div>` +
+    planHtml +
     `<p class="bf-cal-label">Seasonal risk calendar (${esc(disease)})</p><div class="bf-cal">${calHtml}</div>` +
     `<div class="bf-asks"><p class="bf-asks-label">Ask about this district</p>` +
     `<button class="bf-ask" data-a="peak">When does risk peak here?</button>` +
     `<button class="bf-ask" data-a="compare">How does it compare?</button>` +
     `<button class="bf-ask" data-a="why">Why this risk level?</button>` +
     `<div class="bf-answer" id="bfAnswer" hidden></div></div>` +
-    `<p class="bf-llm-note">Grounded in the forecast data. A live LLM adds free-form Q&A at deploy.</p>`;
+    `<p class="bf-llm-note">Deterministic plan, grounded in the forecast data. The live agent reasons over history + peer districts and answers free-form questions.</p>`;
   b.hidden = false;
   railParts(false);
 
