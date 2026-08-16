@@ -106,6 +106,10 @@ body {
 .bf-asks-label { font-size: .72rem; color: var(--muted); margin-bottom: .4rem; }
 .bf-ask { font: inherit; font-size: .78rem; text-align: left; width: 100%; padding: .45rem .6rem; margin-bottom: .35rem; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; cursor: pointer; color: var(--ink); }
 .bf-ask:hover { background: var(--bg); }
+.bf-ask-row { display: flex; gap: .4rem; margin: .5rem 0 .35rem; }
+.bf-input { flex: 1; min-width: 0; font: inherit; font-size: .8rem; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.bf-send { font: inherit; font-size: .8rem; padding: .45rem .8rem; border: none; background: var(--accent); color: #fff; border-radius: 8px; cursor: pointer; }
+.bf-send:disabled { opacity: .6; cursor: default; }
 .bf-answer { font-size: .82rem; line-height: 1.45; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: .55rem .65rem; margin-top: .3rem; }
 .bf-llm-note { font-size: .68rem; color: var(--muted); margin-top: .8rem; font-style: italic; }
 

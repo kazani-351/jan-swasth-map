@@ -5,6 +5,22 @@ const MONTHS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#94a3b8";
 const TIER_COLOR = { High: cssVar("--high"), Watch: cssVar("--watch"), Low: cssVar("--low") };
 const TREND = { rising: "↑ rising", falling: "↓ easing", flat: "→ steady" };
+// Set to your deployed Response Agent Worker URL to activate the live LLM agent (empty = deterministic only).
+const AGENT_ENDPOINT = "";
+
+async function askAgent(context, question) {
+  if (!AGENT_ENDPOINT) return null;
+  try {
+    const r = await fetch(AGENT_ENDPOINT, {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ context, question }),
+    });
+    const d = await r.json();
+    return d && d.text ? d.text : null;   // {fallback:true} or error -> null -> client falls back
+  } catch {
+    return null;
+  }
+}
 const state = { disease: "Dengue", month: 8 };
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -322,6 +338,15 @@ function openBriefing(id) {
       `<div><span class="bf-tl-k">Watch-for</span>${esc(plan.timeline.watch)}</div>` +
     `</div></div>`;
 
+  const context = {
+    district: d.name, state: d.state, disease, month: mn,
+    tier: cur.tier, trend: cur.trend, confidence: cur.conf,
+    expected_cases_this_month: Math.round(cur.score),
+    rank: cur.tier === "Low" ? "not flagged this month" : `${rank} of ${flagged.length} flagged`,
+    seasonal_high_months: highMonths,
+    deterministic_plan: { posture: plan.posture, actions: plan.actions, resources: plan.resources },
+  };
+
   const b = document.getElementById("briefing");
   b.innerHTML =
     `<button class="bf-back" id="bfBack">← All districts</button>` +
@@ -336,8 +361,9 @@ function openBriefing(id) {
     `<button class="bf-ask" data-a="peak">When does risk peak here?</button>` +
     `<button class="bf-ask" data-a="compare">How does it compare?</button>` +
     `<button class="bf-ask" data-a="why">Why this risk level?</button>` +
+    (AGENT_ENDPOINT ? `<div class="bf-ask-row"><input class="bf-input" id="bfInput" placeholder="Ask the agent anything…" maxlength="500" /><button class="bf-send" id="bfSend">Ask</button></div>` : "") +
     `<div class="bf-answer" id="bfAnswer" hidden></div></div>` +
-    `<p class="bf-llm-note">Deterministic plan, grounded in the forecast data. The live agent reasons over history + peer districts and answers free-form questions.</p>`;
+    `<p class="bf-llm-note">${AGENT_ENDPOINT ? "Live agent, grounded strictly in the facts above (deterministic plan is the fallback)." : "Deterministic plan, grounded in the forecast data. The live agent adds free-form Q&A once deployed."}</p>`;
   b.hidden = false;
   railParts(false);
 
@@ -346,6 +372,20 @@ function openBriefing(id) {
   b.querySelectorAll(".bf-ask").forEach(btn => {
     btn.onclick = () => { ans.textContent = answers[btn.dataset.a]; ans.hidden = false; };
   });
+
+  const sendBtn = document.getElementById("bfSend"), input = document.getElementById("bfInput");
+  if (sendBtn && input) {
+    const go = async () => {
+      const q = input.value.trim();
+      if (!q) return;
+      ans.hidden = false; ans.textContent = "Thinking…"; sendBtn.disabled = true;
+      const text = await askAgent(context, q);
+      ans.textContent = text || "The live agent is unavailable right now — see the response plan above.";
+      sendBtn.disabled = false;
+    };
+    sendBtn.onclick = go;
+    input.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  }
 }
 
 boot().catch(err => {

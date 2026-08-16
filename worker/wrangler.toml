@@ -1,0 +1,8 @@
+# Optional — only if deploying via wrangler instead of the dashboard.
+# Secrets/vars to set (dashboard: Settings → Variables; or `wrangler secret put`):
+#   LLM_BASE_URL   e.g. your MeshAPI base (OpenAI-compatible, ending before /chat/completions)
+#   LLM_API_KEY    your provider key
+#   LLM_MODEL      a model id the provider serves
+name = "jan-swasth-agent"
+main = "agent.js"
+compatibility_date = "2026-01-01"

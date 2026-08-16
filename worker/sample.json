@@ -1,0 +1,16 @@
+{
+  "context": {
+    "district": "North 24 Parganas", "state": "West Bengal",
+    "disease": "Dengue", "month": "Aug",
+    "tier": "High", "trend": "rising", "confidence": "high",
+    "expected_cases_this_month": 1108,
+    "rank": "1 of 93 flagged districts",
+    "seasonal_high_months": ["Jul", "Aug", "Sep"],
+    "deterministic_plan": {
+      "posture": "Mobilise",
+      "actions": ["Vector control: fogging + source reduction", "Stock rapid tests and IV fluids", "Activate fever surveillance", "Community messaging: remove standing water"],
+      "resources": "pre-position rapid tests and fluids for ~1108-1662 presentations this month"
+    }
+  },
+  "question": "What should I prioritise this week, and what would make me escalate?"
+}
