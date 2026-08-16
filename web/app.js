@@ -6,7 +6,7 @@ const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(
 const TIER_COLOR = { High: cssVar("--high"), Watch: cssVar("--watch"), Low: cssVar("--low") };
 const TREND = { rising: "↑ rising", falling: "↓ easing", flat: "→ steady" };
 // Set to your deployed Response Agent Worker URL to activate the live LLM agent (empty = deterministic only).
-const AGENT_ENDPOINT = "";
+const AGENT_ENDPOINT = "https://jan-swasth-agent.kazani.workers.dev";
 
 async function askAgent(context, question) {
   if (!AGENT_ENDPOINT) return null;
