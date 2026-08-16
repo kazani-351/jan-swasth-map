@@ -125,6 +125,7 @@ body {
 
 .intro { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
   background: rgba(15,23,42,.45); padding: 1rem; }
+.intro[hidden] { display: none; }   /* must beat the base .intro display:flex so the hidden attribute works */
 .intro-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; max-width: 460px;
   padding: 1.4rem 1.5rem; box-shadow: 0 10px 40px rgba(15,23,42,.25); }
 .intro-card h2 { margin: 0 0 .7rem; font-size: 1.25rem; line-height: 1.25; letter-spacing: -0.01em; }
