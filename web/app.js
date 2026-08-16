@@ -162,7 +162,8 @@ function buildDiseaseToggle(diseases) {
 }
 
 function initMap() {
-  const map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView([20.5, 81], 5);
+  // scroll-wheel zoom off so the map doesn't hijack page scroll (use the +/- control or pinch)
+  const map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([20.5, 81], 5);
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: "abcd", maxZoom: 12
   }).addTo(map);
@@ -218,11 +219,16 @@ function renderRail(fc) {
       `<span class="rail-state">${esc(d.state)}</span>` +
       `<span class="rail-score">~${Math.round(f.score)} cases/yr</span>` +
       `<span class="rail-driver">${esc(f.drivers || "")}</span>`;
-    li.onclick = () => {
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", `${d.name}, ${d.state}, ${f.tier} risk`);
+    const activate = () => {
       const m = markers[id];
       if (m) window._map.setView(m.getLatLng(), 7, { animate: true });
       openBriefing(id);
     };
+    li.onclick = activate;
+    li.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(); } };
     list.appendChild(li);
   });
 
