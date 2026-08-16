@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jan Swasth Map — outbreak early-warning for India</title>
+  <title>Jan Swasth Map: outbreak early-warning for India</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="styles.css" />
@@ -15,16 +15,16 @@
       <p class="tagline">Seasonal outbreak early-warning for district health officers · Maharashtra · Tamil Nadu · West Bengal</p>
     </div>
     <div class="hero-stat" id="heroStat" title="">
-      <span class="hero-num" id="heroNum">—</span>
-      <span class="hero-label">of dengue case-burden captured<br />on held-out years (2016–19)</span>
+      <span class="hero-num" id="heroNum">…</span>
+      <span class="hero-label">of dengue case-burden captured<br />on held-out years (2016-19)</span>
     </div>
   </header>
 
   <div id="intro" class="intro" hidden>
     <div class="intro-card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-      <h2 id="introTitle">Know where outbreaks will hit — and what to do about it.</h2>
+      <h2 id="introTitle">Know where outbreaks will hit, and what to do about it.</h2>
       <p>An open early-warning + response tool for India's <strong>district health officers</strong>. It forecasts seasonal outbreak risk (dengue, diarrhoeal disease) for every district, drafts a prioritised response plan, and lets you ask a grounded AI agent about any district.</p>
-      <p class="intro-honest">Built on real IDSP surveillance data with an honestly validated method — a transparent model that captures <strong>86% of dengue case-burden on held-out years</strong>. The receipts are under <em>"How we know it works."</em></p>
+      <p class="intro-honest">It runs on real IDSP surveillance data, and the method is honestly validated. A transparent model captures <strong>86% of dengue case-burden on years it never saw</strong>. See how under <em>"How we know it works."</em></p>
       <p class="intro-tip">Click any district on the map for its risk read, response plan, and the AI agent.</p>
       <button id="introClose" class="intro-btn">Explore the map →</button>
     </div>
@@ -68,7 +68,7 @@
       <p class="vlede" id="vlede"></p>
       <div class="vcard">
         <h3>Transparent model vs the alternatives</h3>
-        <p class="vsub">Held-out case-weighted capture of dengue burden (2016–19). Higher = more of the real burden caught. Same 3 predicted months for every model.</p>
+        <p class="vsub">Held-out case-weighted capture of dengue burden (2016-19). Higher = more of the real burden caught. Same 3 predicted months for every model.</p>
         <div id="modelBars" class="model-bars"></div>
       </div>
       <div class="vcard">

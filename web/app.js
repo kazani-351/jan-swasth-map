@@ -41,7 +41,7 @@ async function boot() {
     document.getElementById("heroNum").textContent = cap.value + "%";
     const alt = validation.alt_perdistrict_fit_caseweighted_pct, ch = validation.chance_baseline_pct;
     document.getElementById("heroStat").title =
-      `Fixed monsoon prior (Jul–Sep). Held-out case-weighted capture ${cap.value}% ` +
+      `Fixed monsoon prior (Jul-Sep). Held-out case-weighted capture ${cap.value}% ` +
       `vs ${ch ? ch.value : "?"}% chance; a per-district data-fit does worse (${alt ? alt.value : "?"}%).`;
   }
   document.getElementById("footSource").textContent = "Data: " + (meta.source || "");
@@ -87,9 +87,9 @@ function renderValidation() {
   const v = DATA.validation, cs = DATA.caseStudy;
   const cap = v.dengue_capture_caseweighted_pct.value, uw = v.dengue_capture_unweighted_pct.value;
   document.getElementById("vlede").textContent =
-    `A deliberately simple, transparent model — dengue risk concentrates in the Jul–Sep monsoon — ` +
-    `captures ${cap}% of the dengue case-burden in years it was never fit to (2016–19), ~3.4× better than chance, ` +
-    `and it beats data-driven alternatives that overfit.`;
+    `Dengue risk concentrates in the Jul-Sep monsoon. A transparent model built on just that ` +
+    `captures ${cap}% of the dengue case-burden in years it never saw (2016-19), about 3.4x better than chance, ` +
+    `and it beats data-driven models that overfit.`;
 
   const rows = [
     { label: "Monsoon prior (our model)", val: +v.dengue_capture_caseweighted_pct.value, hi: true },
@@ -107,14 +107,14 @@ function renderValidation() {
   const inWin = cs.series_2017.reduce((a, c, i) => a + (cs.model_peak_months.includes(i + 1) ? c : 0), 0);
   const pct = cs.total_2017 ? Math.round(inWin / cs.total_2017 * 100) : 0;
   document.getElementById("csSub").textContent =
-    `${cs.train_note} In the held-out ${cs.year} season, ${pct}% of the outbreak's ${cs.total_2017.toLocaleString()} cases fell inside the predicted Jul–Sep window.`;
+    `${cs.train_note} In the held-out ${cs.year} season, ${pct}% of the outbreak's ${cs.total_2017.toLocaleString()} cases fell inside the predicted Jul-Sep window.`;
   document.getElementById("caseChart").innerHTML = caseChartSVG(cs) + caseLegend();
 
   const caveats = [
-    `Case-weighted capture is ${cap}%; the unweighted month-hit rate is ${uw}% — small, scattered off-season outbreaks are the honest misses. We optimise for catching the burden, not every event.`,
-    "The source is IDSP outbreak-report data (via EpiClim, 2009–2019): outbreaks appear only once already elevated, so this is seasonal risk, not live case-curve nowcasting.",
+    `Case-weighted capture is ${cap}%; the unweighted month-hit rate is ${uw}%. The misses are small, scattered off-season outbreaks. We aim to catch the burden that matters, and we say so.`,
+    "The source is IDSP outbreak-report data (via EpiClim, 2009-2019): outbreaks appear only once already elevated, so this is seasonal risk, not live case-curve nowcasting.",
     "Grain is monthly and per-district; malaria is too sparse in these states to forecast (kept as data-only).",
-    "The window is a fixed monsoon-climatology prior, not tuned to the test years — a window fit to the data does worse (shown above).",
+    "The window is a fixed monsoon-climatology prior, not tuned to the test years. A window fit to the data does worse (shown above).",
   ];
   document.getElementById("caveats").innerHTML = caveats.map(c => `<li>${esc(c)}</li>`).join("");
 }
@@ -144,7 +144,7 @@ function caseChartSVG(cs) {
 }
 
 function caseLegend() {
-  return `<div class="cc-legend"><span class="l-band">Predicted High-risk window (Jul–Sep)</span>` +
+  return `<div class="cc-legend"><span class="l-band">Predicted High-risk window (Jul-Sep)</span>` +
     `<span class="l-bar">${DATA.caseStudy.year} cases</span>` +
     `<span style="border-bottom:1px dashed var(--muted)">Typical seasonal shape</span></div>`;
 }
@@ -230,7 +230,7 @@ function renderRail(fc) {
     `${state.disease === "Acute Diarrhoeal Disease" ? "Diarrhoeal" : state.disease} · ${MONTHS[state.month]}`;
   document.getElementById("railNote").textContent = rows.length
     ? `${rows.length} districts at High/Watch. Ranked by expected burden this month.`
-    : "No elevated-risk districts for this month — off-season.";
+    : "No elevated-risk districts this month (off-season).";
 }
 
 function wireControls() {
@@ -286,7 +286,7 @@ function buildResponsePlan(cur, disease) {
   const s = Math.round(cur.score || 0);
   const resources = (tier === "Low" || s < 5)
     ? "Routine stock levels; no surge pre-positioning indicated."
-    : `Indicative: pre-position rapid tests and fluids for ~${s}–${Math.round(s * 1.5)} presentations this month (scaled to expected burden — refine with local stock).`;
+    : `Indicative: pre-position rapid tests and fluids for about ${s} to ${Math.round(s * 1.5)} presentations this month (scaled to expected burden; refine with local stock).`;
 
   const timeline = tier === "Low"
     ? { week: "Continue routine reporting.", month: "Watch for the seasonal ramp (see calendar).", watch: "Any case cluster → open a line-list." }
@@ -321,10 +321,10 @@ function openBriefing(id) {
   const dn = shortDisease(disease), mn = MONTHS[month];
   let text;
   if (cur.tier === "Low") {
-    text = `In ${mn}, ${d.name} is at low ${dn} risk — off-season here. Historical ${mn} caseload is minimal.`;
+    text = `In ${mn}, ${d.name} is at low ${dn} risk. Off-season here, with minimal historical ${mn} caseload.`;
   } else {
     const sev = cur.tier === "High" ? "HIGH" : "elevated (Watch)";
-    text = `In ${mn}, ${d.name} is at ${sev} ${dn} risk — the seasonal peak window. ` +
+    text = `In ${mn}, ${d.name} is at ${sev} ${dn} risk, in the seasonal peak window. ` +
       `The district historically records ~${Math.round(cur.score)} cases in ${mn} (${cur.conf} confidence). ` +
       (rank ? `It ranks #${rank} of ${flagged.length} flagged districts across the pilot this month.` : "");
   }
@@ -401,7 +401,7 @@ function openBriefing(id) {
       if (!q) return;
       ans.hidden = false; ans.textContent = "Thinking…"; sendBtn.disabled = true;
       const text = await askAgent(context, q);
-      ans.textContent = text || "The live agent is unavailable right now — see the response plan above.";
+      ans.textContent = text || "The live agent is unavailable right now. See the response plan above.";
       sendBtn.disabled = false;
     };
     sendBtn.onclick = go;
@@ -413,7 +413,7 @@ function openBriefing(id) {
     briefBtn.onclick = async () => {
       ans.hidden = false; ans.textContent = "Drafting…"; briefBtn.disabled = true;
       const text = await askAgent(context, "");
-      ans.textContent = text || "The live agent is unavailable right now — see the response plan above.";
+      ans.textContent = text || "The live agent is unavailable right now. See the response plan above.";
       briefBtn.disabled = false;
     };
   }
