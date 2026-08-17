@@ -58,7 +58,7 @@ body {
 .lg { font-size: .72rem; padding: .12rem .5rem; border-radius: 999px; color: #fff; }
 .lg-high { background: var(--high); } .lg-watch { background: var(--watch); } .lg-low { background: var(--low); }
 
-.layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; height: calc(100vh - 168px); min-height: 420px; }
+.layout { display: grid; grid-template-columns: 1fr 340px; gap: 0; height: calc(100vh - 240px); min-height: 420px; }
 .map-wrap { position: relative; }
 #map { position: absolute; inset: 0; background: var(--bg); }
 .rail { background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden; }
@@ -144,7 +144,7 @@ body {
 }
 .view-nav button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
 
-#validationView { overflow-y: auto; height: calc(100vh - 118px); background: var(--bg); }
+#validationView { overflow-y: auto; height: calc(100vh - 184px); background: var(--bg); }
 .vwrap { max-width: 780px; margin: 0 auto; padding: 1.6rem 1.25rem 3rem; }
 .vwrap > h2 { margin: .2rem 0 .4rem; font-size: 1.5rem; letter-spacing: -0.01em; }
 .vlede { color: var(--muted); font-size: .95rem; margin: 0 0 1.4rem; }
