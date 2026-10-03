@@ -43,4 +43,4 @@ Cloudflare Workers static assets serve `web/` (vanilla JS, Leaflet). The Python 
 ## Data and license
 
 - **EpiClim:** weekly district-wise all-India epidemics and climate dataset, Zenodo record 14580510, CC-BY-4.0, sourced from India's Integrated Disease Surveillance Programme (IDSP).
-- Code is open-source (Apache-2.0/MIT).
+- Code is open-source under the MIT License (see `LICENSE`).
