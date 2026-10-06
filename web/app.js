@@ -164,8 +164,10 @@ function buildDiseaseToggle(diseases) {
 function initMap() {
   // scroll-wheel zoom off so the map doesn't hijack page scroll (use the +/- control or pinch)
   const map = L.map("map", { zoomControl: true, scrollWheelZoom: false }).setView([20.5, 81], 5);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; OpenStreetMap &copy; CARTO', subdomains: "abcd", maxZoom: 12
+  // OSM standard tiles (no key); CARTO basemaps started serving "API KEY REQUIRED" tiles in 2026-10.
+  // Greyed in styles.css so the risk markers stay the loudest thing on the map.
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 12
   }).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   window._map = map;

@@ -195,3 +195,6 @@ body {
   .mb-row { grid-template-columns: 1fr auto; grid-template-areas: "label val" "track track"; row-gap: .3rem; }
   .mb-label { grid-area: label; } .mb-val { grid-area: val; } .mb-track { grid-area: track; }
 }
+
+/* OSM tiles are colourful; grey them so risk markers stand out */
+.leaflet-tile-pane { filter: grayscale(1) brightness(1.05) contrast(0.9); }
