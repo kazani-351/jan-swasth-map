@@ -3,7 +3,7 @@
 Full spec: @SPEC.md · Work order: @tickets.md
 
 ## What this is
-Open population-health early-warning dashboard for Indian District Health Officers (pilot: Maharashtra, Tamil Nadu, West Bengal). Forecasts outbreak risk (dengue, malaria, acute-diarrheal), explains it, and flags where rising risk meets thin infrastructure. Hackathon: Code for India "Code for a Billion" Track 03. Deploy + open-source by 15 Nov 2026.
+Open population-health early-warning dashboard for Indian District Health Officers (pilot: Maharashtra, Tamil Nadu, West Bengal). Forecasts outbreak risk (dengue, malaria, acute-diarrheal), explains it, and flags where rising risk meets thin infrastructure. Hackathon: Code for India "Code for a Billion", Health area. Deploy + open-source by 15 Nov 2026.
 
 ## The wedge (build everything to prove this)
 Lead with the **backtest**: "on real IDSP data, a transparent model would have flagged outbreak X in district Y, N weeks before the peak." The dashboard showcases it. If the backtest doesn't honestly hold, we change the positioning — we do NOT fake it.

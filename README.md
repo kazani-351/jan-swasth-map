@@ -4,7 +4,7 @@ Open outbreak early-warning and response tool for India's district health office
 
 **Live:** https://jan-swasth-map.kazani.workers.dev
 
-Built for Code for India's *Code for a Billion* hackathon (Track 03). Open data only, no personal or health records. Open-source.
+Built for Code for India's *Code for a Billion* hackathon (Health area). Open data only, no personal or health records. Open-source.
 
 ## What it does
 

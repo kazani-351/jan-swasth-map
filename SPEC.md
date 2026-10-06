@@ -1,7 +1,7 @@
 # SPEC — Jan Swasth Map
 
 **Project:** Jan Swasth Map (working name) — open population-health early-warning dashboard for India
-**Hackathon:** Code for India — "Code for a Billion" (Bharat Agentic-AI Hackathon 2026), Track 03
+**Hackathon:** Code for India — "Code for a Billion" (Bharat Agentic-AI Hackathon 2026), Track 03 (tracks later became open impact areas; this is the Health area)
 **Deadline:** Deployed to cloud + open-sourced by **15 Nov 2026**. Winners 5 Dec 2026.
 **Builder:** kazani (solo). Attribution retained; code open-sourced (Apache-2.0/MIT) to CFI GitHub org.
 **Date locked:** 2026-08-09.

@@ -65,4 +65,4 @@ python3 pipeline/refresh.py   # pull, verify, and rebuild everything (or run ing
 ## Data and credits
 
 - **EpiClim**: weekly district-wise all-India epidemics and climate dataset, Zenodo record 14580510, CC-BY-4.0. Sourced from India's Integrated Disease Surveillance Programme (IDSP).
-- Built for Code for India's *Code for a Billion* hackathon (Track 03). Open-source.
+- Built for Code for India's *Code for a Billion* hackathon (Health area). Open-source.
