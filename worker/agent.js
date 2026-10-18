@@ -86,8 +86,8 @@ export default {
       const data = await r.json();
       const text = data?.choices?.[0]?.message?.content?.trim();
       return text ? reply({ text }, 200, h) : reply({ fallback: true, reason: "empty completion" }, 200, h);
-    } catch (e) {
-      return reply({ fallback: true, reason: String(e).slice(0, 120) }, 200, h);
+    } catch {
+      return reply({ fallback: true, reason: "provider error" }, 200, h);
     } finally {
       clearTimeout(timer);
     }
