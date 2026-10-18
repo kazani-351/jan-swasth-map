@@ -61,12 +61,32 @@ function cleanFacts(c) {
   };
 }
 
+// Usage counter: totals only, per UTC day. Stores no question text, district, IP or user data.
+// Needs an optional KV binding named STATS; without it counting is skipped and nothing else changes.
+// Read-modify-write, so two simultaneous requests can lose a count: treat figures as approximate.
+async function bump(env, mode, fallback) {
+  if (!env.STATS) return;
+  try {
+    const day = new Date().toISOString().slice(0, 10);
+    const s = (await env.STATS.get("stats", "json")) || { since: day, total: 0, days: {} };
+    const d = (s.days[day] ||= { brief: 0, question: 0, fallback: 0 });
+    d[mode]++;
+    if (fallback) d.fallback++;
+    s.total++;
+    await env.STATS.put("stats", JSON.stringify(s));
+  } catch { /* never let counting break an answer */ }
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const allowed = env.ALLOWED_ORIGIN || "*";   // set to your Pages URL to restrict; unset = open
     const origin = request.headers.get("Origin") || "";
     const h = cors(allowed);
 
+    if (request.method === "GET" && new URL(request.url).pathname === "/stats") {
+      const s = env.STATS ? await env.STATS.get("stats", "json") : null;
+      return reply(s || { total: 0, days: {} }, 200, cors("*"));   // aggregate counts only, safe to expose
+    }
     if (request.method === "OPTIONS") return new Response(null, { headers: h });
     if (request.method !== "POST") return reply({ error: "POST only" }, 405, h);
     if (allowed !== "*" && origin !== allowed) return reply({ error: "forbidden origin" }, 403, h);
@@ -90,6 +110,7 @@ export default {
       return reply({ error: "missing context" }, 400, h);
     }
     const facts = cleanFacts(body.context);
+    const count = fallback => ctx.waitUntil(bump(env, question ? "question" : "brief", fallback));
 
     const user = question
       ? `Verified facts:\n${JSON.stringify(facts)}\n\nQuestion from the district officer: ${question}`
@@ -109,11 +130,13 @@ export default {
           messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
         }),
       });
-      if (!r.ok) return reply({ fallback: true, reason: `provider ${r.status}` }, 200, h);
+      if (!r.ok) { count(true); return reply({ fallback: true, reason: `provider ${r.status}` }, 200, h); }
       const data = await r.json();
       const text = data?.choices?.[0]?.message?.content?.trim();
+      count(!text);
       return text ? reply({ text }, 200, h) : reply({ fallback: true, reason: "empty completion" }, 200, h);
     } catch {
+      count(true);
       return reply({ fallback: true, reason: "provider error" }, 200, h);
     } finally {
       clearTimeout(timer);
