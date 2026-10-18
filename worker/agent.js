@@ -12,6 +12,9 @@
  *   ALLOWED_ORIGIN (optional) your Pages URL, e.g. https://jan-swasth-map.pages.dev — set once the
  *                  site is live to lock this Worker to your own frontend. Unset = open to all.
  *
+ * Request size is capped (MAX_BODY) and `context` is rebuilt from a fixed field list. That bounds the cost of
+ * ONE request, not the number of requests: add a Cloudflare rate-limiting rule on this route as well.
+ *
  * If the LLM errors or is unconfigured, returns {fallback:true} so the client shows its deterministic
  * plan — the demo never breaks. Set a provider spend cap: this endpoint is public.
  *
@@ -40,6 +43,24 @@ function reply(obj, status, headers) {
   });
 }
 
+const MAX_BODY = 8192;   // real payloads are ~1 KB; caps what one request can spend on input tokens
+const STR = (v, n = 200) => String(v ?? "").slice(0, n);
+const list = a => (Array.isArray(a) ? a : []).slice(0, 12).map(x => STR(x));
+
+// Rebuild the facts from the fields the client really sends, so a caller cannot pad the prompt
+// (or the bill) with arbitrary keys or long strings.
+function cleanFacts(c) {
+  const p = c.deterministic_plan && typeof c.deterministic_plan === "object" ? c.deterministic_plan : {};
+  return {
+    district: STR(c.district), state: STR(c.state), disease: STR(c.disease), month: STR(c.month),
+    tier: STR(c.tier, 20), trend: STR(c.trend, 20), confidence: STR(c.confidence, 20),
+    expected_cases_this_month: Number(c.expected_cases_this_month) || 0,
+    rank: STR(c.rank),
+    seasonal_high_months: list(c.seasonal_high_months),
+    deterministic_plan: { posture: STR(p.posture), actions: list(p.actions), resources: STR(p.resources, 400) },
+  };
+}
+
 export default {
   async fetch(request, env) {
     const allowed = env.ALLOWED_ORIGIN || "*";   // set to your Pages URL to restrict; unset = open
@@ -54,15 +75,21 @@ export default {
       return reply({ fallback: true, reason: "agent not configured" }, 200, h);
     }
 
+    if (Number(request.headers.get("content-length")) > MAX_BODY) return reply({ error: "too large" }, 413, h);
+    const raw = await request.text();
+    if (raw.length > MAX_BODY) return reply({ error: "too large" }, 413, h);
     let body;
     try {
-      body = await request.json();
+      body = JSON.parse(raw);
     } catch {
       return reply({ error: "bad json" }, 400, h);
     }
-    const facts = body.context;
+    if (!body || typeof body !== "object") return reply({ error: "bad json" }, 400, h);
     const question = (body.question || "").toString().slice(0, 500);
-    if (!facts || typeof facts !== "object") return reply({ error: "missing context" }, 400, h);
+    if (!body.context || typeof body.context !== "object" || Array.isArray(body.context)) {
+      return reply({ error: "missing context" }, 400, h);
+    }
+    const facts = cleanFacts(body.context);
 
     const user = question
       ? `Verified facts:\n${JSON.stringify(facts)}\n\nQuestion from the district officer: ${question}`
